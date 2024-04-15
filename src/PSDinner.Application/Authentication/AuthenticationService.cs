@@ -1,6 +1,7 @@
-﻿using System;
+﻿using ErrorOr;
 using PSDinner.Application.Common.Interfaces.Authentication;
 using PSDinner.Application.Common.Interfaces.Persistence;
+using PSDinner.Domain.Common.Errors;
 using PSDinner.Domain.Entities;
 
 namespace PSDinner.Application.Authentication;
@@ -16,17 +17,17 @@ public class AuthenticationService : IAuthenticationService
         _tokenGenerator = tokenGenerator;
         _userRepository = userRepository;
     }
-
-    public AuthenticationResult Login(string email, string password)
+    
+    public ErrorOr<AuthenticationResult> Login(string email, string password)
     {
         if (_userRepository.GetUserByEmail(email) is not User user)
         {
-            throw new Exception("Email does not exist");
+            return Errors.User.DuplicateEmail;
         }
 
         if (password != user.Password)
         {
-            throw new Exception("Invalid password");
+            return Errors.Authentication.InvalidCredentials;
         }
 
         var token = _tokenGenerator.GenerateToken(user);
@@ -36,11 +37,11 @@ public class AuthenticationService : IAuthenticationService
             token);
     }
 
-    public AuthenticationResult Register(string firstName, string lastName, string email, string password)
+    public ErrorOr<AuthenticationResult> Register(string firstName, string lastName, string email, string password)
     {
         if (_userRepository.GetUserByEmail(email) is not null)
         {
-            throw new Exception("User with this email already exists");
+            return Errors.User.DuplicateEmail;
         }
 
         User user = new User

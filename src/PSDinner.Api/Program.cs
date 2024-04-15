@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using PSDinner.Api.Errors;
-using PSDinner.Api.Middleware;
 using PSDinner.Application;
 using PSDinner.Infrastructure;
 
@@ -11,21 +10,12 @@ builder.Services.AddControllers();
 builder.Services
     .AddApplicationServices()
     .AddInfrastructureServices(builder.Configuration);
-    
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+builder.Services.AddSingleton<ProblemDetailsFactory, ApplicationProblemDetailsFactory>();
 
 var app = builder.Build();
 
 app.UseExceptionHandler("/error");
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
 
 app.UseHttpsRedirection();
 
