@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using PSDinner.Api.Errors;
+using PSDinner.Api.Middleware;
 using PSDinner.Application;
 using PSDinner.Infrastructure;
 
@@ -14,6 +17,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+app.UseExceptionHandler("/error");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
