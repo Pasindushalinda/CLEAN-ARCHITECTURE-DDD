@@ -1,39 +1,62 @@
 ﻿using System;
-using PSDinner.Application.Common.Infrastructure.Authentication;
+using PSDinner.Application.Common.Interfaces.Authentication;
+using PSDinner.Application.Common.Interfaces.Persistence;
+using PSDinner.Domain.Entities;
 
 namespace PSDinner.Application.Authentication;
 
 public class AuthenticationService : IAuthenticationService
 {
     private readonly IJwtTokenGenerator _tokenGenerator;
+    private readonly IUserRepository _userRepository;
 
-    public AuthenticationService(IJwtTokenGenerator tokenGenerator)
+    public AuthenticationService(IJwtTokenGenerator tokenGenerator,
+        IUserRepository userRepository)
     {
         _tokenGenerator = tokenGenerator;
-    }
-    public AuthenticationResult Login(string email, string password)
-    {
-        var userId = Guid.NewGuid();
-        
-        return new AuthenticationResult(
-            userId,
-            "Amichai",
-            "Mantinband",
-            email,
-            "token");
+        _userRepository = userRepository;
     }
 
-    public AuthenticationResult Register (string firstName, string lastName, string email, string password)
+    public AuthenticationResult Login(string email, string password)
     {
-        var userId = Guid.NewGuid();
-        
-        var token = _tokenGenerator.GenerateToken(userId.ToString(), firstName, lastName, email);
-        
+        if (_userRepository.GetUserByEmail(email) is not User user)
+        {
+            throw new Exception("Email does not exist");
+        }
+
+        if (password != user.Password)
+        {
+            throw new Exception("Invalid password");
+        }
+
+        var token = _tokenGenerator.GenerateToken(user);
+
         return new AuthenticationResult(
-            userId,
-            "firstName",
-            "lastName",
-            email,
+            user,
+            token);
+    }
+
+    public AuthenticationResult Register(string firstName, string lastName, string email, string password)
+    {
+        if (_userRepository.GetUserByEmail(email) is not null)
+        {
+            throw new Exception("User with this email already exists");
+        }
+
+        User user = new User
+        {
+            FirstName = firstName,
+            LastName = lastName,
+            Email = email,
+            Password = password
+        };
+
+        _userRepository.AddUser(user);
+
+        var token = _tokenGenerator.GenerateToken(user);
+
+        return new AuthenticationResult(
+            user,
             token
         );
     }

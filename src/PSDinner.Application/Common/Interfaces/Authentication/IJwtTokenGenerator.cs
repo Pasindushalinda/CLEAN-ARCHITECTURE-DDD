@@ -1,6 +1,8 @@
-﻿namespace PSDinner.Application.Common.Infrastructure.Authentication;
+﻿using PSDinner.Domain.Entities;
+
+namespace PSDinner.Application.Common.Interfaces.Authentication;
 
 public interface IJwtTokenGenerator
 {
-    string GenerateToken(string userId, string firstName, string lastName, string email);
+    string GenerateToken(User user);
 }
