@@ -1,5 +1,4 @@
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using PSDinner.Api.Errors;
+using PSDinner.Api;
 using PSDinner.Application;
 using PSDinner.Infrastructure;
 
@@ -8,10 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services
+    .AddPresentationServices()
     .AddApplicationServices()
     .AddInfrastructureServices(builder.Configuration);
-
-builder.Services.AddSingleton<ProblemDetailsFactory, ApplicationProblemDetailsFactory>();
 
 var app = builder.Build();
 

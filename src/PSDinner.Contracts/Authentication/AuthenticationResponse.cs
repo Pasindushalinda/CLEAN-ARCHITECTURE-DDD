@@ -4,5 +4,8 @@ using PSDinner.Domain.Entities;
 namespace PSDinner.Contracts.Authentication;
 
 public record AuthenticationResponse(
-    User User,
+    Guid Id,
+    string FirstName,
+    string LastName,
+    string Email,
     string Token);
