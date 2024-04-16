@@ -1,6 +1,8 @@
-﻿using PSDinner.Application.Authentication;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using PSDinner.Application.Common.Interfaces.Persistence;
+using PSDinner.Application.Authentication.Command.Register;
+using PSDinner.Application.Authentication.Common;
+using PSDinner.Application.Authentication.Query;
 using PSDinner.Contracts.Authentication;
 
 namespace PSDinner.Api.Controllers;
@@ -9,22 +11,24 @@ namespace PSDinner.Api.Controllers;
 [Route("auth")]
 public class AuthenticationController : ApiController
 {
-    private readonly IAuthenticationService _authenticationService;
+    private readonly ISender _sender;
 
-    public AuthenticationController(IAuthenticationService authenticationService)
+    public AuthenticationController(ISender sender)
     {
-        _authenticationService = authenticationService;
+        _sender = sender;
     }
 
     [HttpPost("register")]
-    public IActionResult Register(RegisterRequest request)
+    public async Task<IActionResult> Register(RegisterRequest request)
     {
-        var authResult = _authenticationService.Register(
+        var command = new RegisterCommand(
             request.FirstName,
             request.LastName,
             request.Email,
             request.Password
         );
+
+        var authResult = await _sender.Send(command);
 
         return authResult.Match(
             authResult => Ok(MapAuthResult(authResult)),
@@ -32,18 +36,20 @@ public class AuthenticationController : ApiController
     }
 
     [HttpPost("login")]
-    public IActionResult Login(LoginRequest request)
+    public async Task<IActionResult> Login(LoginRequest request)
     {
-        var authResult = _authenticationService.Login(
+        var query = new LoginQuery(
             request.Email,
             request.Password
         );
+
+        var authResult = await _sender.Send(query);
 
         return authResult.Match(
             authResult => Ok(MapAuthResult(authResult)),
             errors => Problem(errors));
     }
-    
+
     private static AuthenticationResponse MapAuthResult(AuthenticationResult authResult)
     {
         return new AuthenticationResponse(
