@@ -38,7 +38,7 @@ public class AuthenticationController : ApiController
         var query = _mapper.Map<LoginQuery>(request);
 
         var authResult = await _sender.Send(query);
-        
+
         if (authResult.IsError &&
             authResult.FirstError == Domain.Common.Errors.Errors.Authentication.InvalidCredentials)
         {
