@@ -1,5 +1,6 @@
 ﻿using MapsterMapper;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PSDinner.Application.Authentication.Command.Register;
 using PSDinner.Application.Authentication.Query;
@@ -7,8 +8,8 @@ using PSDinner.Contracts.Authentication;
 
 namespace PSDinner.Api.Controllers;
 
-[ApiController]
 [Route("auth")]
+[AllowAnonymous]
 public class AuthenticationController : ApiController
 {
     private readonly ISender _sender;
